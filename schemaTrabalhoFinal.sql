@@ -341,6 +341,11 @@ CREATE SEQUENCE public.telefone_id_seq
 
 ALTER SEQUENCE public.telefone_id_seq OWNER TO postgres;
 
+-- Adicionar coluna 'id_usuario' como chave estrangeira referenciando 'usuario(id)'
+ALTER TABLE public.telefone_contato
+ADD COLUMN id_usuario integer NOT NULL,
+ADD CONSTRAINT fk_id_usuario FOREIGN KEY (id_usuario) REFERENCES public.usuario(id);
+
 --
 -- TOC entry 4901 (class 0 OID 0)
 -- Dependencies: 219
