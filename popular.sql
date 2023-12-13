@@ -58,6 +58,14 @@ INSERT INTO public.chamado (id, descricao, data, urgencia, id_localizacao, estad
   (4, 'Atualização de software', '2023-04-10', 'Alta', 4, 'Aberto'),
   (5, 'Erro no aplicativo', '2023-05-05', 'Média', 4, 'Fechado');
   
+-- Inserir dados na tabela 'usuario_chamado'
+INSERT INTO public.usuario_chamado (id_usuario_abriu, id_chamado, id_usuario_fechou) VALUES
+  (1,1,NULL),
+  (1,2,NULL),
+  (2,3,4),
+  (3,4,NULL),
+  (3,5,4);
+ 
 -- Inserir dados na tabela 'solucao_chamado'
 INSERT INTO public.solucao_chamado (id, id_chamado, mensagem) VALUES
   (1, 1, 'Reinicialização do roteador resolveu o problema'),
