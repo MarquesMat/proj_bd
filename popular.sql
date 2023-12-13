@@ -13,6 +13,22 @@ INSERT INTO public.localizacao (id, nome, id_localizacao) VALUES
   (9, 'Sala 208', 6),
   (10, 'Praia Vermelha', null);
 
+-- Atualizando os nomes das localizações com valores diferentes
+UPDATE public.localizacao
+SET nome = 
+  CASE 
+    WHEN id = 1 THEN 'Bloco D'
+    WHEN id = 2 THEN 'Bloco E'
+    WHEN id = 3 THEN 'NAB'
+    WHEN id = 4 THEN 'IC'
+	WHEN id = 5 THEN 'Praia Vermelha'
+	WHEN id = 6 THEN 'Gragoatá'
+    WHEN id = 7 THEN 'IACS'
+    WHEN id = 8 THEN 'Bloco P'
+    WHEN id = 9 THEN 'IEF'
+    WHEN id = 10 THEN 'Bloco N'
+  END;
+
 -- Inserir dados na tabela 'nivel'
 INSERT INTO public.nivel (id, tipo, descricao) VALUES
   (1, 'Administrador', 'Gerenciar o banco de dados'),
