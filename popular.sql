@@ -1,20 +1,19 @@
 -- Inserir dados na tabela 'localizacao'
 INSERT INTO public.localizacao (id, nome, id_localizacao) VALUES
-  (1, 'Sala 101', 5),
-  (2, 'Sala 102', 5),
-  (3, 'Sala 201', 5),
-  (4, 'Sala 202', 5),
-  (5, 'Praia Vermelha', null);
+  (1, 'Bloco D', 5),
+  (2, 'Bloco E', 5),
+  (3, 'NAB', 5),
+  (4, 'IC', 5),
+  (5, 'Praia Vermelha', null),
+  (6, 'Gragoatá', null),
+  (7, 'IACS', 6),
+  (8, 'Bloco P', 6),
+  (9, 'IEF', 6),
+  (10, 'Bloco N', null);
+    
   
-INSERT INTO public.localizacao (id, nome, id_localizacao) VALUES
-  (6, 'Gragoata', null),
-  (7, 'Sala 401', 6),
-  (8, 'Sala 306', 6),
-  (9, 'Sala 208', 6),
-  (10, 'Praia Vermelha', null);
-
 -- Atualizando os nomes das localizações com valores diferentes
-UPDATE public.localizacao
+/*UPDATE public.localizacao
 SET nome = 
   CASE 
     WHEN id = 1 THEN 'Bloco D'
@@ -27,7 +26,7 @@ SET nome =
     WHEN id = 8 THEN 'Bloco P'
     WHEN id = 9 THEN 'IEF'
     WHEN id = 10 THEN 'Bloco N'
-  END;
+  END;*/
 
 -- Inserir dados na tabela 'nivel'
 INSERT INTO public.nivel (id, tipo, descricao) VALUES
@@ -38,11 +37,11 @@ INSERT INTO public.nivel (id, tipo, descricao) VALUES
 
 -- Inserir dados na tabela 'usuario'
 INSERT INTO public.usuario (id, nome, cpf, dt_nasc, id_nivel) VALUES
-  (1, 'João Silva', '123.456.789-01', '1990-01-15', 1),
+  (1, 'João Silva', '123.456.789-01', '1960-01-15', 1),
   (2, 'Maria Santos', '987.654.321-01', '1985-05-20', 2),
   (3, 'Carlos Oliveira', '456.789.012-34', '1992-09-10', 3),
   (4, 'Ana Pereira', '876.543.210-98', '1980-03-25', 2),
-  (5, 'Lucas Souza', '234.567.890-12', '1995-07-05', 1);
+  (5, 'Lucas Souza', '234.567.890-12', '1964-07-05', 2);
 
 -- Inserir dados na tabela 'equipamento'
 INSERT INTO public.equipamento (mac, marca, modelo, data_aquisicao, id_localizacao, ip) VALUES
@@ -95,7 +94,7 @@ INSERT INTO public.solucao_chamado (id, id_chamado, mensagem) VALUES
   (2, 2, 'Atualização do sistema operacional realizada com sucesso'),
   (3, 3, 'Substituição do hardware defeituoso'),
   (4, 4, 'Realizada a atualização para a versão mais recente'),
-  (5, 5, 'Investigando e corrigindo o bug no código do aplicativo')
+  (5, 5, 'Investigando e corrigindo o bug no código do aplicativo'),
   (6, 10, 'O arquivos foram recuperados do último backup');
   
 -- Inserir dados na tabela 'usuario_chamado'
