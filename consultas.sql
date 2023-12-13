@@ -1,3 +1,41 @@
+--- 1. Selecionar o nome, nível do usuário, e a quantidade de chamados fechados por cada usuário.
+SELECT public.usuario.nome, public.usuario.id_nivel, COUNT(public.usuario_chamado.id_chamado) AS total
+FROM public.usuario
+INNER JOIN public.usuario_chamado ON public.usuario_chamado.id_usuario = public.usuario.id
+WHERE usuario_chamado.papel = 'fechou'
+GROUP BY public.usuario.id
+ORDER BY total DESC
+
+-- 2. Selecionar o nome, o id do usuário responsável pelos equipamentos localizados no Gragoatá, e a contagem de equipamentos
+WITH	localizacao_maior AS (
+	SELECT *
+	FROM public.localizacao
+	WHERE public.localizacao.nome = 'Gragoatá'
+	)
+SELECT public.usuario.id, public.usuario.nome, COUNT(public.equipamento.mac)
+FROM public.usuario
+INNER JOIN public.responsavel_equipamento ON public.responsavel_equipamento.id_usuario = public.usuario.id
+INNER JOIN public.equipamento ON public.equipamento.mac = public.responsavel_equipamento.mac_equipamento
+INNER JOIN public.localizacao ON public.localizacao.id = public.equipamento.id_localizacao
+INNER JOIN localizacao_maior ON public.localizacao.id_localizacao = localizacao_maior.id
+GROUP BY public.usuario.id
+
+--- 3. Selecionar a marca com maior número de chamados agrupado por computador.
+SELECT public.equipamento.marca, COUNT(public.chamado_equipamento.id_chamado)
+FROM public.equipamento
+INNER JOIN public.computador ON public.computador.mac_equipamento = public.equipamento.mac
+INNER JOIN public.chamado_equipamento ON public.chamado_equipamento.mac_equipamento = public.equipamento.mac
+GROUP BY public.equipamento.marca
+
+--- 4. Selecionar o telefone e o nome dos usuários com o menor número de chamados fechados.
+SELECT public.usuario.nome, public.telefone_contato.num, COUNT(public.usuario_chamado.id_chamado)
+FROM public.usuario
+INNER JOIN public.telefone_contato ON public.telefone_contato.id_usuario = public.usuario.id
+INNER JOIN public.usuario_chamado ON public.usuario_chamado.id_usuario = public.usuario.id
+INNER JOIN public.chamado ON public.chamado.id = public.usuario_chamado.id_chamado
+WHERE public.chamado.estado = 'Fechado'
+GROUP BY public.usuario.nome, public.telefone_contato.num
+
 --- 5. Selecionar informações de pessoas nível Usuário responsáveis por mais equipamentos
 select distinct u.id, nome, num as telefone, count(mac_equipamento) as total_equipamentos
 from usuario u join telefone_contato t on u.id = t.id_usuario
