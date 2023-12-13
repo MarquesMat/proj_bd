@@ -5,7 +5,7 @@
 -- Dumped from database version 16.1
 -- Dumped by pg_dump version 16.0
 
--- Started on 2023-12-13 11:03:10
+-- Started on 2023-12-13 20:18:39
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -29,13 +29,143 @@ CREATE SCHEMA public;
 ALTER SCHEMA public OWNER TO pg_database_owner;
 
 --
--- TOC entry 4896 (class 0 OID 0)
+-- TOC entry 4903 (class 0 OID 0)
 -- Dependencies: 4
 -- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: pg_database_owner
 --
 
 COMMENT ON SCHEMA public IS 'standard public schema';
 
+
+--
+-- TOC entry 236 (class 1255 OID 18116)
+-- Name: alteraestadochamado(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.alteraestadochamado() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+begin
+	update chamado set estado = 'Fechado' where id = new.id_chamado;
+	return NULL;
+end;
+$$;
+
+
+ALTER FUNCTION public.alteraestadochamado() OWNER TO postgres;
+
+--
+-- TOC entry 250 (class 1255 OID 18128)
+-- Name: chamadosabertos(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.chamadosabertos() RETURNS TABLE(resultado text)
+    LANGUAGE plpgsql
+    AS $$
+begin
+	return query
+	Select concat('Id Usuário: ',u.id,' |Nome: ',u.nome,
+	' |Id Chamado: ',c.id,' |Descrição: ',c.descricao,' |Urgência: ',c.urgencia,' |Estado: ',c.estado,
+	' |MAC: ',ce.mac_equipamento,' |Localização: ',l.nome)
+	from usuario u inner join usuario_chamado uc on u.id = uc.id_usuario
+	inner join chamado c on uc.id_chamado = c.id	
+	inner join localizacao l on c.id_localizacao = l.id
+	inner join chamado_equipamento ce on c.id = ce.id_chamado
+	where c.estado = 'Aberto';
+end;
+$$;
+
+
+ALTER FUNCTION public.chamadosabertos() OWNER TO postgres;
+
+--
+-- TOC entry 238 (class 1255 OID 18125)
+-- Name: contarequipamento(character varying); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.contarequipamento(tipo character varying) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+declare qtd_equipamentos int;
+begin
+	if tipo = 'camera'
+		then select count(mac_equipamento) into qtd_equipamentos from camera;
+	elsif tipo = 'computador'
+		then select count(mac_equipamento) into qtd_equipamentos from computador;
+	elsif tipo = 'dvr'
+		then select count(mac_equipamento) into qtd_equipamentos from dvr;
+	elsif tipo = 'switch'
+		then select count(mac_equipamento) into qtd_equipamentos from switch;
+	end if;
+	return qtd_equipamentos;
+end;
+$$;
+
+
+ALTER FUNCTION public.contarequipamento(tipo character varying) OWNER TO postgres;
+
+--
+-- TOC entry 237 (class 1255 OID 18121)
+-- Name: promoverusuario(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.promoverusuario() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+declare contador_fechados int;
+begin
+	select count(id_usuario) into contador_fechados from usuario_chamado where id_usuario = new.id_usuario and papel = 'fechou';
+	
+	if contador_fechados <= 3
+		then update usuario set id_nivel = 2 where id = new.id_usuario;
+		
+	elsif  contador_fechados > 3 and contador_fechados < 6
+		then update usuario set id_nivel = 4 where id = new.id_usuario;
+		
+	else update usuario set id_nivel = 3 where id = new.id_usuario;
+	end if;
+	return NULL;
+end;
+$$;
+
+
+ALTER FUNCTION public.promoverusuario() OWNER TO postgres;
+
+--
+-- TOC entry 251 (class 1255 OID 18133)
+-- Name: tempovidaequipamento(character varying); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.tempovidaequipamento(tipo character varying) RETURNS TABLE(texto text)
+    LANGUAGE plpgsql
+    AS $$
+begin
+	if tipo = 'camera'
+		then return query
+		select concat('Marca: ',marca,' | Modelo: ',modelo,' | Mac: ',mac,' |Tempo de Vida: ',age(current_date,data_aquisicao))
+		from equipamento e
+		inner join camera c on e.mac = c.mac_equipamento;
+	elsif tipo = 'computador'
+		then return query 
+		select concat('Marca: ',marca,' | Modelo: ',modelo,' | Mac: ',mac,' |Tempo de Vida: ',age(current_date,data_aquisicao))
+		from equipamento e
+		inner join computador c on e.mac = c.mac_equipamento;
+	elsif tipo = 'dvr'
+		then return query 
+		select concat('Marca: ',marca,' | Modelo: ',modelo,' | Mac: ',mac,' |Tempo de Vida: ',age(current_date,data_aquisicao))
+		from equipamento e
+		inner join dvr on e.mac = dvr.mac_equipamento;
+	elsif tipo = 'switch'
+		then return query 
+		select concat('Marca: ',marca,' | Modelo: ',modelo,' | Mac: ',mac,' |Tempo de Vida: ',age(current_date,data_aquisicao))
+		from equipamento e
+		inner join switch s on e.mac = s.mac_equipamento;
+	end if;
+end;
+$$;
+
+
+ALTER FUNCTION public.tempovidaequipamento(tipo character varying) OWNER TO postgres;
 
 SET default_tablespace = '';
 
@@ -102,7 +232,7 @@ CREATE SEQUENCE public.chamado_id_seq
 ALTER SEQUENCE public.chamado_id_seq OWNER TO postgres;
 
 --
--- TOC entry 4897 (class 0 OID 0)
+-- TOC entry 4904 (class 0 OID 0)
 -- Dependencies: 221
 -- Name: chamado_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -199,7 +329,7 @@ CREATE SEQUENCE public.localizacao_id_seq
 ALTER SEQUENCE public.localizacao_id_seq OWNER TO postgres;
 
 --
--- TOC entry 4898 (class 0 OID 0)
+-- TOC entry 4905 (class 0 OID 0)
 -- Dependencies: 227
 -- Name: localizacao_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -238,7 +368,7 @@ CREATE SEQUENCE public.nivel_id_seq
 ALTER SEQUENCE public.nivel_id_seq OWNER TO postgres;
 
 --
--- TOC entry 4899 (class 0 OID 0)
+-- TOC entry 4906 (class 0 OID 0)
 -- Dependencies: 215
 -- Name: nivel_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -290,7 +420,7 @@ CREATE SEQUENCE public.solucao_chamado_id_seq
 ALTER SEQUENCE public.solucao_chamado_id_seq OWNER TO postgres;
 
 --
--- TOC entry 4900 (class 0 OID 0)
+-- TOC entry 4907 (class 0 OID 0)
 -- Dependencies: 223
 -- Name: solucao_chamado_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -343,7 +473,7 @@ CREATE SEQUENCE public.telefone_id_seq
 ALTER SEQUENCE public.telefone_id_seq OWNER TO postgres;
 
 --
--- TOC entry 4901 (class 0 OID 0)
+-- TOC entry 4908 (class 0 OID 0)
 -- Dependencies: 219
 -- Name: telefone_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -398,7 +528,7 @@ CREATE SEQUENCE public.usuario_id_seq
 ALTER SEQUENCE public.usuario_id_seq OWNER TO postgres;
 
 --
--- TOC entry 4902 (class 0 OID 0)
+-- TOC entry 4909 (class 0 OID 0)
 -- Dependencies: 217
 -- Name: usuario_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -407,7 +537,7 @@ ALTER SEQUENCE public.usuario_id_seq OWNED BY public.usuario.id;
 
 
 --
--- TOC entry 4698 (class 2604 OID 17872)
+-- TOC entry 4703 (class 2604 OID 17872)
 -- Name: chamado id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -415,7 +545,7 @@ ALTER TABLE ONLY public.chamado ALTER COLUMN id SET DEFAULT nextval('public.cham
 
 
 --
--- TOC entry 4700 (class 2604 OID 17896)
+-- TOC entry 4705 (class 2604 OID 17896)
 -- Name: localizacao id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -423,7 +553,7 @@ ALTER TABLE ONLY public.localizacao ALTER COLUMN id SET DEFAULT nextval('public.
 
 
 --
--- TOC entry 4695 (class 2604 OID 17846)
+-- TOC entry 4700 (class 2604 OID 17846)
 -- Name: nivel id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -431,7 +561,7 @@ ALTER TABLE ONLY public.nivel ALTER COLUMN id SET DEFAULT nextval('public.nivel_
 
 
 --
--- TOC entry 4699 (class 2604 OID 17879)
+-- TOC entry 4704 (class 2604 OID 17879)
 -- Name: solucao_chamado id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -439,7 +569,7 @@ ALTER TABLE ONLY public.solucao_chamado ALTER COLUMN id SET DEFAULT nextval('pub
 
 
 --
--- TOC entry 4697 (class 2604 OID 17865)
+-- TOC entry 4702 (class 2604 OID 17865)
 -- Name: telefone_contato id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -447,7 +577,7 @@ ALTER TABLE ONLY public.telefone_contato ALTER COLUMN id SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 4696 (class 2604 OID 17853)
+-- TOC entry 4701 (class 2604 OID 17853)
 -- Name: usuario id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -455,7 +585,7 @@ ALTER TABLE ONLY public.usuario ALTER COLUMN id SET DEFAULT nextval('public.usua
 
 
 --
--- TOC entry 4722 (class 2606 OID 17918)
+-- TOC entry 4727 (class 2606 OID 17918)
 -- Name: camera camera_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -464,7 +594,7 @@ ALTER TABLE ONLY public.camera
 
 
 --
--- TOC entry 4730 (class 2606 OID 17953)
+-- TOC entry 4735 (class 2606 OID 17953)
 -- Name: chamado_equipamento chamado_equipamento_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -473,7 +603,7 @@ ALTER TABLE ONLY public.chamado_equipamento
 
 
 --
--- TOC entry 4712 (class 2606 OID 17886)
+-- TOC entry 4717 (class 2606 OID 17886)
 -- Name: chamado_ligado chamado_ligado_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -482,7 +612,7 @@ ALTER TABLE ONLY public.chamado_ligado
 
 
 --
--- TOC entry 4708 (class 2606 OID 17874)
+-- TOC entry 4713 (class 2606 OID 17874)
 -- Name: chamado chamado_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -491,7 +621,7 @@ ALTER TABLE ONLY public.chamado
 
 
 --
--- TOC entry 4720 (class 2606 OID 17908)
+-- TOC entry 4725 (class 2606 OID 17908)
 -- Name: computador computador_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -500,7 +630,7 @@ ALTER TABLE ONLY public.computador
 
 
 --
--- TOC entry 4726 (class 2606 OID 17938)
+-- TOC entry 4731 (class 2606 OID 17938)
 -- Name: dvr dvr_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -509,7 +639,7 @@ ALTER TABLE ONLY public.dvr
 
 
 --
--- TOC entry 4718 (class 2606 OID 17903)
+-- TOC entry 4723 (class 2606 OID 17903)
 -- Name: equipamento equipamento_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -518,7 +648,7 @@ ALTER TABLE ONLY public.equipamento
 
 
 --
--- TOC entry 4716 (class 2606 OID 17898)
+-- TOC entry 4721 (class 2606 OID 17898)
 -- Name: localizacao localizacao_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -527,7 +657,7 @@ ALTER TABLE ONLY public.localizacao
 
 
 --
--- TOC entry 4702 (class 2606 OID 17848)
+-- TOC entry 4707 (class 2606 OID 17848)
 -- Name: nivel nivel_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -536,7 +666,7 @@ ALTER TABLE ONLY public.nivel
 
 
 --
--- TOC entry 4714 (class 2606 OID 18114)
+-- TOC entry 4719 (class 2606 OID 18114)
 -- Name: usuario_chamado pk_usuario_chamado; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -545,7 +675,7 @@ ALTER TABLE ONLY public.usuario_chamado
 
 
 --
--- TOC entry 4728 (class 2606 OID 17948)
+-- TOC entry 4733 (class 2606 OID 17948)
 -- Name: responsavel_equipamento responsavel_equipamento_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -554,7 +684,7 @@ ALTER TABLE ONLY public.responsavel_equipamento
 
 
 --
--- TOC entry 4710 (class 2606 OID 17881)
+-- TOC entry 4715 (class 2606 OID 17881)
 -- Name: solucao_chamado solucao_chamado_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -563,7 +693,7 @@ ALTER TABLE ONLY public.solucao_chamado
 
 
 --
--- TOC entry 4724 (class 2606 OID 17928)
+-- TOC entry 4729 (class 2606 OID 17928)
 -- Name: switch switch_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -572,7 +702,7 @@ ALTER TABLE ONLY public.switch
 
 
 --
--- TOC entry 4706 (class 2606 OID 17867)
+-- TOC entry 4711 (class 2606 OID 17867)
 -- Name: telefone_contato telefone_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -581,7 +711,7 @@ ALTER TABLE ONLY public.telefone_contato
 
 
 --
--- TOC entry 4704 (class 2606 OID 17855)
+-- TOC entry 4709 (class 2606 OID 17855)
 -- Name: usuario usuario_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -590,7 +720,23 @@ ALTER TABLE ONLY public.usuario
 
 
 --
--- TOC entry 4741 (class 2606 OID 17919)
+-- TOC entry 4754 (class 2620 OID 18122)
+-- Name: usuario_chamado promover_trig; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER promover_trig AFTER INSERT OR UPDATE ON public.usuario_chamado FOR EACH ROW EXECUTE FUNCTION public.promoverusuario();
+
+
+--
+-- TOC entry 4753 (class 2620 OID 18117)
+-- Name: solucao_chamado solucao_trig; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER solucao_trig AFTER INSERT OR UPDATE ON public.solucao_chamado FOR EACH ROW EXECUTE FUNCTION public.alteraestadochamado();
+
+
+--
+-- TOC entry 4746 (class 2606 OID 17919)
 -- Name: camera camera_macequipamento_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -599,7 +745,7 @@ ALTER TABLE ONLY public.camera
 
 
 --
--- TOC entry 4740 (class 2606 OID 17909)
+-- TOC entry 4745 (class 2606 OID 17909)
 -- Name: computador computador_macequipamento_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -608,7 +754,7 @@ ALTER TABLE ONLY public.computador
 
 
 --
--- TOC entry 4743 (class 2606 OID 17939)
+-- TOC entry 4748 (class 2606 OID 17939)
 -- Name: dvr dvr_macequipamento_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -617,7 +763,7 @@ ALTER TABLE ONLY public.dvr
 
 
 --
--- TOC entry 4732 (class 2606 OID 18099)
+-- TOC entry 4737 (class 2606 OID 18099)
 -- Name: telefone_contato fk_id_usuario; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -626,7 +772,7 @@ ALTER TABLE ONLY public.telefone_contato
 
 
 --
--- TOC entry 4734 (class 2606 OID 17959)
+-- TOC entry 4739 (class 2606 OID 17959)
 -- Name: chamado_ligado fk_idchamado; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -635,7 +781,7 @@ ALTER TABLE ONLY public.chamado_ligado
 
 
 --
--- TOC entry 4736 (class 2606 OID 17979)
+-- TOC entry 4741 (class 2606 OID 17979)
 -- Name: usuario_chamado fk_idchamado; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -644,7 +790,7 @@ ALTER TABLE ONLY public.usuario_chamado
 
 
 --
--- TOC entry 4746 (class 2606 OID 18014)
+-- TOC entry 4751 (class 2606 OID 18014)
 -- Name: chamado_equipamento fk_idchamado; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -653,7 +799,7 @@ ALTER TABLE ONLY public.chamado_equipamento
 
 
 --
--- TOC entry 4735 (class 2606 OID 17964)
+-- TOC entry 4740 (class 2606 OID 17964)
 -- Name: chamado_ligado fk_idchamadoligado; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -662,7 +808,7 @@ ALTER TABLE ONLY public.chamado_ligado
 
 
 --
--- TOC entry 4733 (class 2606 OID 17954)
+-- TOC entry 4738 (class 2606 OID 17954)
 -- Name: chamado fk_idlocalizacao; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -671,7 +817,7 @@ ALTER TABLE ONLY public.chamado
 
 
 --
--- TOC entry 4738 (class 2606 OID 17984)
+-- TOC entry 4743 (class 2606 OID 17984)
 -- Name: localizacao fk_idlocalizacao; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -680,7 +826,7 @@ ALTER TABLE ONLY public.localizacao
 
 
 --
--- TOC entry 4739 (class 2606 OID 17989)
+-- TOC entry 4744 (class 2606 OID 17989)
 -- Name: equipamento fk_idlocalizacao; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -689,7 +835,7 @@ ALTER TABLE ONLY public.equipamento
 
 
 --
--- TOC entry 4737 (class 2606 OID 17969)
+-- TOC entry 4742 (class 2606 OID 17969)
 -- Name: usuario_chamado fk_idusuario; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -698,7 +844,7 @@ ALTER TABLE ONLY public.usuario_chamado
 
 
 --
--- TOC entry 4744 (class 2606 OID 18004)
+-- TOC entry 4749 (class 2606 OID 18004)
 -- Name: responsavel_equipamento fk_idusuario; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -707,7 +853,7 @@ ALTER TABLE ONLY public.responsavel_equipamento
 
 
 --
--- TOC entry 4745 (class 2606 OID 18009)
+-- TOC entry 4750 (class 2606 OID 18009)
 -- Name: responsavel_equipamento fk_mac_equipamento; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -716,7 +862,7 @@ ALTER TABLE ONLY public.responsavel_equipamento
 
 
 --
--- TOC entry 4747 (class 2606 OID 18019)
+-- TOC entry 4752 (class 2606 OID 18019)
 -- Name: chamado_equipamento fk_mac_equipamento; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -725,7 +871,7 @@ ALTER TABLE ONLY public.chamado_equipamento
 
 
 --
--- TOC entry 4742 (class 2606 OID 17929)
+-- TOC entry 4747 (class 2606 OID 17929)
 -- Name: switch switch_macequipamento_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -734,7 +880,7 @@ ALTER TABLE ONLY public.switch
 
 
 --
--- TOC entry 4731 (class 2606 OID 17856)
+-- TOC entry 4736 (class 2606 OID 17856)
 -- Name: usuario usuario_idnivel_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -742,7 +888,7 @@ ALTER TABLE ONLY public.usuario
     ADD CONSTRAINT usuario_idnivel_fkey FOREIGN KEY (id_nivel) REFERENCES public.nivel(id);
 
 
--- Completed on 2023-12-13 11:03:10
+-- Completed on 2023-12-13 20:18:39
 
 --
 -- PostgreSQL database dump complete
