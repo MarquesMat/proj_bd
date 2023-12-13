@@ -131,3 +131,12 @@ INSERT INTO public.responsavel_equipamento (id_usuario, mac_equipamento) VALUES
   (3, 'AA:BB:CC:DD:EE:16'),
   (2, 'AA:BB:CC:DD:EE:21'),
   (2, 'AA:BB:CC:DD:EE:25');
+
+-- Inserir dados na tabela 'chamado_equipamento'
+INSERT INTO public.chamado_equipamento (id_chamado, mac_equipamento) VALUES
+  (2, 'AA:BB:CC:DD:EE:02'),
+  (3, 'AA:BB:CC:DD:EE:02'),
+  (4, 'AA:BB:CC:DD:EE:02'),
+  (1, 'AA:BB:CC:DD:EE:24'),
+  (1, 'AA:BB:CC:DD:EE:25'),
+  (5, 'AA:BB:CC:DD:EE:14');
