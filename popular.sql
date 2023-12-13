@@ -17,7 +17,8 @@ INSERT INTO public.localizacao (id, nome, id_localizacao) VALUES
 INSERT INTO public.nivel (id, tipo, descricao) VALUES
   (1, 'Administrador', 'Gerenciar o banco de dados'),
   (2, 'Usuário', 'Abrir e fechar chamados'),
-  (3, 'Supervisor', 'Gerenciar a equipe');
+  (3, 'Supervisor', 'Supervisiona usuários'),
+  (4, 'Gerente', 'Gerencia a equipe');
 
 -- Inserir dados na tabela 'usuario'
 INSERT INTO public.usuario (id, nome, cpf, dt_nasc, id_nivel) VALUES
