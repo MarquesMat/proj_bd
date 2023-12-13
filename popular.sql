@@ -59,12 +59,14 @@ INSERT INTO public.chamado (id, descricao, data, urgencia, id_localizacao, estad
   (5, 'Erro no aplicativo', '2023-05-05', 'Média', 4, 'Fechado');
   
 -- Inserir dados na tabela 'usuario_chamado'
-INSERT INTO public.usuario_chamado (id_usuario_abriu, id_chamado, id_usuario_fechou) VALUES
-  (1,1,NULL),
-  (1,2,NULL),
-  (2,3,4),
-  (3,4,NULL),
-  (3,5,4);
+INSERT INTO public.usuario_chamado (id_usuario, id_chamado, papel) VALUES
+(1,1,'abriu'),
+(1,2,'abriu'),
+(2,3,'abriu'),
+(4,3,'fechou'),
+(3,4,'abriu'),
+(3,5,'abriu'),
+(4,5,'fechou')
  
 -- Inserir dados na tabela 'solucao_chamado'
 INSERT INTO public.solucao_chamado (id, id_chamado, mensagem) VALUES
