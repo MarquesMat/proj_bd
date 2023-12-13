@@ -12,10 +12,10 @@ group by nome
 order by chamados_abertos;
 
 --- 7. Selecionar equipamentos com chamados de nível "urgência alta" ordenado por quantidade.
-select count(c.id) as urgentes, ip from equipamento e, chamado c, chamado_equipamento ce
-where e.mac = ce.mac_equipamento and c.id = ce.id_chamado and c.urgencia like 'Alta'
+select count(c.id) as urgentes, ip from equipamento e join chamado_equipamento ce on e.mac = ce.mac_equipamento
+left join chamado c on c.urgencia like 'Alta' and c.id = ce.id_chamado
 group by ip
-order by urgentes;
+order by urgentes desc;
 
 --- 8. Proporção de chamados em aberto no ano de 2023
 select 
