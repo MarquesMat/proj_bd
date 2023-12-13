@@ -5,11 +5,11 @@ left join responsavel_equipamento r on u.id=r.id_usuario
 where id_nivel = (select id from nivel where tipo like 'Usuário')
 group by u.id, nome, num;
 
---- 6. Calcular razão entre número de chamados e número de equipamentos por localização
-select l.nome, (count(ce.id_chamado)/count(ce.mac_equipamento)) as razao from localizacao l, chamado c, chamado_equipamento ce
-where l.id = c.id_localizacao and c.id = ce.id_chamado
-group by l.nome
-order by razao;
+--- 6. Calcular número de chamados em aberto por localização
+select nome, count(*) as chamados_abertos from localizacao l, chamado c
+where l.id = c.id_localizacao and estado like 'Aberto'
+group by nome
+order by chamados_abertos;
 
 --- 7. Selecionar equipamentos com chamados de nível "urgência alta" ordenado por quantidade.
 select count(c.id) as urgentes, ip from equipamento e, chamado c, chamado_equipamento ce
