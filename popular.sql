@@ -49,7 +49,14 @@ INSERT INTO public.equipamento (mac, marca, modelo, data_aquisicao, id_localizac
   ('AA:BB:CC:DD:EE:23', 'Hikvision', 'J559', '2021-07-4', 1, '172.20.225.03'),
   ('AA:BB:CC:DD:EE:24', 'Teki', 'Speed Dome', '2008-06-20', 3, '172.20.120.11'),
   ('AA:BB:CC:DD:EE:25', 'Teki', 'Speed Dome', '2008-06-20', 9, '172.20.120.12');
-
+  
+INSERT INTO public.equipamento (mac, marca, modelo, data_aquisicao, id_localizacao, ip) VALUES
+  ('AA:BB:CC:DD:EE:26', 'Hikvision', 'J760', '2021-10-5', 7, '172.20.130.10'),
+  ('AA:BB:CC:DD:EE:27', 'Hikvision', 'J760', '2021-10-5', 7, '172.20.130.11'),
+  ('AA:BB:CC:DD:EE:28', 'Hikvision', 'J760', '2021-10-5', 7, '172.20.130.12'),
+  ('AA:BB:CC:DD:EE:29', 'Aruba', 'G45D', '2022-06-14', 9, '172.20.212.17'),
+  ('AA:BB:CC:DD:EE:30', 'Acer', 'Aspire', '2019-05-05', 5, '192.168.0.8');
+  
 -- Inserir dados na tabela 'chamado'
 INSERT INTO public.chamado (id, descricao, data, urgencia, id_localizacao, estado) VALUES
   (1, 'Problema na rede', '2023-01-10', 'Alta', 1, 'Aberto'),
@@ -57,6 +64,22 @@ INSERT INTO public.chamado (id, descricao, data, urgencia, id_localizacao, estad
   (3, 'Hardware defeituoso', '2023-03-20', 'Baixa', 3, 'Fechado'),
   (4, 'Atualização de software', '2023-04-10', 'Alta', 4, 'Aberto'),
   (5, 'Erro no aplicativo', '2023-05-05', 'Média', 4, 'Fechado');
+  
+INSERT INTO public.chamado (id, descricao, data, urgencia, id_localizacao, estado) VALUES
+  (6, 'Reposição de câmera', '2023-08-21', 'Alta', 7, 'Aberto'),
+  (7, 'Reposição de câmera', '2023-08-21', 'Alta', 7, 'Aberto'),
+  (8, 'Reposição de câmera', '2023-08-21', 'Alta', 7, 'Aberto'),
+  (9, 'Conector com mal contato', '2023-02-07', 'Baixa', 9, 'Aberto'),
+  (10, 'Arquivos faltando', '2022-09-02', 'Média', 5, 'Fechado');
+  
+-- Inserir dados na tabela 'solucao_chamado'
+INSERT INTO public.solucao_chamado (id, id_chamado, mensagem) VALUES
+  (1, 1, 'Reinicialização do roteador resolveu o problema'),
+  (2, 2, 'Atualização do sistema operacional realizada com sucesso'),
+  (3, 3, 'Substituição do hardware defeituoso'),
+  (4, 4, 'Realizada a atualização para a versão mais recente'),
+  (5, 5, 'Investigando e corrigindo o bug no código do aplicativo')
+  (6, 10, 'O arquivos foram recuperados do último backup');
   
 -- Inserir dados na tabela 'usuario_chamado'
 INSERT INTO public.usuario_chamado (id_usuario, id_chamado, papel) VALUES
@@ -66,15 +89,7 @@ INSERT INTO public.usuario_chamado (id_usuario, id_chamado, papel) VALUES
 (4,3,'fechou'),
 (3,4,'abriu'),
 (3,5,'abriu'),
-(4,5,'fechou')
- 
--- Inserir dados na tabela 'solucao_chamado'
-INSERT INTO public.solucao_chamado (id, id_chamado, mensagem) VALUES
-  (1, 1, 'Reinicialização do roteador resolveu o problema'),
-  (2, 2, 'Atualização do sistema operacional realizada com sucesso'),
-  (3, 3, 'Substituição do hardware defeituoso'),
-  (4, 4, 'Realizada a atualização para a versão mais recente'),
-  (5, 5, 'Investigando e corrigindo o bug no código do aplicativo');
+(4,5,'fechou');
 
 -- Inserir dados na tabela 'chamado_ligado'
 INSERT INTO public.chamado_ligado (id_chamado, id_chamado_ligado) VALUES
@@ -131,7 +146,7 @@ INSERT INTO public.responsavel_equipamento (id_usuario, mac_equipamento) VALUES
   (3, 'AA:BB:CC:DD:EE:16'),
   (2, 'AA:BB:CC:DD:EE:21'),
   (2, 'AA:BB:CC:DD:EE:25');
-
+ 
 -- Inserir dados na tabela 'chamado_equipamento'
 INSERT INTO public.chamado_equipamento (id_chamado, mac_equipamento) VALUES
   (2, 'AA:BB:CC:DD:EE:02'),
@@ -140,3 +155,10 @@ INSERT INTO public.chamado_equipamento (id_chamado, mac_equipamento) VALUES
   (1, 'AA:BB:CC:DD:EE:24'),
   (1, 'AA:BB:CC:DD:EE:25'),
   (5, 'AA:BB:CC:DD:EE:14');
+  
+INSERT INTO public.chamado_equipamento (id_chamado, mac_equipamento) VALUES
+  (6, 'AA:BB:CC:DD:EE:26'),
+  (7, 'AA:BB:CC:DD:EE:27'),
+  (8, 'AA:BB:CC:DD:EE:28'),
+  (9, 'AA:BB:CC:DD:EE:29'),
+  (10, 'AA:BB:CC:DD:EE:30');
